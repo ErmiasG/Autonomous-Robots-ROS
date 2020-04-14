@@ -5,7 +5,7 @@ import rospy
 from std_msgs.msg import Float64
 from std_msgs.msg import String
 from geometry_msgs.msg import Vector3
-from pb_sense_hat.msg import SenseInputEvent
+from assignment_1.msg import SenseInputEvent
 from sense_hat import SenseHat
 
 class SensePublisher:
