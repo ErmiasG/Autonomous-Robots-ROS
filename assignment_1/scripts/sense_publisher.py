@@ -35,7 +35,7 @@ class SensePublisher:
         self.pub_compass.publish(self.sense.get_compass())
         stickEvents = self.sense.stick.get_events()
         if len(stickEvents) > 0:
-            event = SenseInputEvent(stickEvents[-1].timestamp, stickEvents[-1].direction, stickEvents[-1].action)
+            event = SenseInputEvent(stickEvents[-1].direction, stickEvents[-1].action)
             self.pub_stick.publish(event)
 
     def turn_off(self):
