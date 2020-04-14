@@ -2,7 +2,9 @@
 
 import time
 import rospy
+from std_msgs.msg import Float64
 from std_msgs.msg import String
+from geometry_msgs.msg import Vector3
 from assignment_1.msg import SenseInputEvent
 
 class SenseSubscriber:
@@ -47,6 +49,6 @@ class SenseSubscriber:
         rospy.spin()
 
 if __name__ == '__main__':
-    n = SenseListener()
+    n = SenseSubscriber()
     n.run()
 
