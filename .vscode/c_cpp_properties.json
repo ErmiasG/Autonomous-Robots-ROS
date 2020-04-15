@@ -1,0 +1,37 @@
+{
+    "configurations": [
+        {
+            "browse": {
+                "databaseFilename": "",
+                "limitSymbolsToIncludedHeaders": true
+            },
+            "includePath": [
+                "/home/ermias/Projects/Robotics/DT701A/smarter_ws/devel/include",
+                "/opt/ros/melodic/include",
+                "/home/ermias/Projects/Robotics/DT701A/smarter_ws/src/Autonomous-Robots-ROS/assignment_1/include",
+                "/home/ermias/Projects/Robotics/DT701A/smarter_ws/src/Autonomous-Robots-ROS/assignment_2/include",
+                "/home/ermias/Projects/Robotics/DT701A/smarter_ws/src/navigation_oru-release/gazebo_oru/gazebo_plugins_oru/include",
+                "/home/ermias/Projects/Robotics/DT701A/smarter_ws/src/navigation_oru-release/orunav_constraint_extract/include",
+                "/home/ermias/Projects/Robotics/DT701A/smarter_ws/src/navigation_oru-release/orunav_conversions/include",
+                "/home/ermias/Projects/Robotics/DT701A/smarter_ws/src/navigation_oru-release/orunav_debug/include",
+                "/home/ermias/Projects/Robotics/DT701A/smarter_ws/src/navigation_oru-release/orunav_generic/include",
+                "/home/ermias/Projects/Robotics/DT701A/smarter_ws/src/navigation_oru-release/orunav_geometry/include",
+                "/home/ermias/Projects/Robotics/DT701A/smarter_ws/src/navigation_oru-release/orunav_motion_planner/include",
+                "/home/ermias/Projects/Robotics/DT701A/smarter_ws/src/navigation_oru-release/orunav_node_utils/include",
+                "/home/ermias/Projects/Robotics/DT701A/smarter_ws/src/navigation_oru-release/orunav_pallet_detection_sdf/include",
+                "/home/ermias/Projects/Robotics/DT701A/smarter_ws/src/navigation_oru-release/orunav_path_pool/include",
+                "/home/ermias/Projects/Robotics/DT701A/smarter_ws/src/navigation_oru-release/orunav_path_smoother/include",
+                "/home/ermias/Projects/Robotics/DT701A/smarter_ws/src/navigation_oru-release/orunav_rviz/include",
+                "/home/ermias/Projects/Robotics/DT701A/smarter_ws/src/navigation_oru-release/orunav_trajectory_processor/include",
+                "/home/ermias/Projects/Robotics/DT701A/smarter_ws/src/navigation_oru-release/orunav_vehicle_execution/include",
+                "/usr/include"
+            ],
+            "name": "Linux",
+            "intelliSenseMode": "gcc-x64",
+            "compilerPath": "/usr/bin/gcc",
+            "cStandard": "c11",
+            "cppStandard": "c++17"
+        }
+    ],
+    "version": 4
+}

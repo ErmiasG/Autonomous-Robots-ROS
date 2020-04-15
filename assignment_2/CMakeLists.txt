@@ -8,10 +8,10 @@ project(assignment_2)
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
-  message_generation
-  roscpp
-  rospy
-  std_msgs
+  gazebo_msgs
+  gazebo_plugins
+  gazebo_ros
+  gazebo_ros_control
 )
 
 ## System dependencies are found with CMake's conventions
@@ -71,7 +71,7 @@ find_package(catkin REQUIRED COMPONENTS
 ## Generate added messages and services with any dependencies listed here
 # generate_messages(
 #   DEPENDENCIES
-#   std_msgs
+#   gazebo_msgs
 # )
 
 ################################################
@@ -106,7 +106,7 @@ find_package(catkin REQUIRED COMPONENTS
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES assignment_2
-#  CATKIN_DEPENDS message_generation roscpp rospy std_msgs
+#  CATKIN_DEPENDS gazebo_msgs gazebo_plugins gazebo_ros gazebo_ros_control
 #  DEPENDS system_lib
 )
 
