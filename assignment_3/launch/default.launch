@@ -1,0 +1,4 @@
+<launch>
+  <node name="basic_shapes" pkg="assignment_3" type="basic_shapes"/>
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find assignment_3)/launch/default.rviz"/>
+</launch>

@@ -1,0 +1,4 @@
+<launch>
+  <node name="play" pkg="rosbag" type="play" args="$(find assignment_3)/data/tf.bag"/>
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find assignment_3)/launch/default.rviz"/>
+</launch>

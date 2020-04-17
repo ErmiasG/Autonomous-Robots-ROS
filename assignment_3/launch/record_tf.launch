@@ -1,0 +1,7 @@
+<launch>
+  <node name="basic_shapes" pkg="assignment_3" type="basic_shapes"/>
+  <!-- if no path / filname is specified, check the ~/.ros folder -->
+  <node name="record" pkg="rosbag" type="record" args="-O $(find assignment_3)/data/tf.bag /visualization_marker"/>
+
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find assignment_3)/launch/default.rviz"/>
+</launch>
