@@ -1,11 +1,21 @@
 <launch>
+  
   <!-- We resume the logic in empty_world.launch, changing only the name of the world to be launched -->
   <include file="$(find gazebo_ros)/launch/empty_world.launch">
     <arg name="world_name" value="$(find assignment_2)/worlds/gas_station.world"/> <!-- Note: the world_name is with respect to GAZEBO_RESOURCE_PATH environmental variable -->
   </include>
-  <!-- Convert an xacro and put on parameter server -->
-  <param name="robot_description" command="$(find xacro)/xacro.py $(find cititruck_description)/urdf/cititruck.xacro" />
-
-  <!-- Spawn a robot into Gazebo -->
-  <node name="spawn_urdf" pkg="gazebo_ros" type="spawn_model" args="-param robot_description -urdf -model cititruck" />
+  <group ns="robot1">
+    <arg name="robot_name" default="robot1"/>
+    <arg name="asus_camera" default="false" />
+    <arg name="velodyne" default="false" />
+    <arg name="kinect2" default="false" />
+    <!-- Convert an xacro and put on parameter server -->
+    <param name="robot_description" command="$(find xacro)/xacro.py $(find cititruck_description)/urdf/cititruck.xacro
+        velodyne:=$(arg velodyne) kinect2:=$(arg kinect2) kinect1:=$(arg asus_camera) kinect1_name:=asus_fork tf_prefix:=$(arg robot_name)/sensors  controller_prefix:=controller/  sensor_prefix:=sensors/  sick_name:=laser2d_floor ls2000_name:=laser2d_top kinect2_name:=kinect2"
+      />
+    <!-- Spawn a robot into Gazebo 
+    <node name="spawn_urdf" pkg="gazebo_ros" type="spawn_model" args="-param robot_description -urdf -model robot1" />-->
+    <node name="spawn_urdf" pkg="gazebo_ros" type="spawn_model" args="-param robot_description -urdf -model robot1" respawn="false" output="screen" />
+    <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
+  </group>
 </launch>
