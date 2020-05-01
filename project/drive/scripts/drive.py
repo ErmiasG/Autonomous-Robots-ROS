@@ -16,9 +16,10 @@ class Drive:
 
     def set_power(self):
         # Power settings
-        voltageIn = rospy.get_param('~voltage_in', 12.0) # Total battery voltage to the PicoBorg Reverse
-        voltageOut = rospy.get_param('~voltage_out', 6.0) # Maximum motor voltage
-
+        #voltageIn = rospy.get_param('~voltage_in', 12.0) # Total battery voltage to the PicoBorg Reverse
+        #voltageOut = rospy.get_param('~voltage_out', 6.0) # Maximum motor voltage
+        voltageIn = 12.0 # Total battery voltage to the PicoBorg Reverse
+        voltageOut = 6.0 # Maximum motor voltage
         # Setup the power limits
         if voltageOut > voltageIn:
             self.maxPower = 1.0
@@ -70,7 +71,7 @@ class Drive:
         self.PBR.SetMotor2(-driveLeft * self.maxPower)
 
     def turn_off(self):
-        self.PBR.SetLed(True)
+        self.PBR.SetLed(False)
         self.PBR.MotorsOff()
 
     def run(self):
