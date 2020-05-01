@@ -50,6 +50,7 @@ class Drive:
         if not failsafe:
             print ('Board %02X failed to report in failsafe mode!' % (PBR.i2cAddress))
             sys.exit()
+        self.PBR.SetCommsFailsafe(False)
         self.PBR.ResetEpo()
         self.PBR.MotorsOff()
 
@@ -80,6 +81,7 @@ class Drive:
 if __name__ == '__main__':
     try:
         d = Drive()
+        rospy.on_shutdown(d.turn_off)
         d.run()
     except rospy.ROSInterruptException:
         d.turn_off()
