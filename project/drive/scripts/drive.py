@@ -16,10 +16,9 @@ class Drive:
 
     def set_power(self):
         # Power settings
-        #voltageIn = rospy.get_param('~voltage_in', 12.0) # Total battery voltage to the PicoBorg Reverse
-        #voltageOut = rospy.get_param('~voltage_out', 6.0) # Maximum motor voltage
-        voltageIn = 12.0 # Total battery voltage to the PicoBorg Reverse
-        voltageOut = 6.0 # Maximum motor voltage
+        voltageIn = rospy.get_param('~voltage_in', 12.0) # Total battery voltage to the PicoBorg Reverse
+        voltageOut = rospy.get_param('~voltage_out', 6.0) # Maximum motor voltage
+        
         # Setup the power limits
         if voltageOut > voltageIn:
             self.maxPower = 1.0
@@ -58,8 +57,8 @@ class Drive:
         upDown = twist.linear.x
         leftRight = twist.angular.z
 
-        driveLeft = -upDown
-        driveRight = -upDown
+        driveLeft = upDown
+        driveRight = upDown
         if leftRight < -0.05:
             # Turning left
             driveLeft *= 1.0 + (2.0 * leftRight)
@@ -71,7 +70,7 @@ class Drive:
         self.PBR.SetMotor2(-driveLeft * self.maxPower)
 
     def turn_off(self):
-        self.PBR.SetLed(False)
+        #self.PBR.SetLed(False)
         self.PBR.MotorsOff()
 
     def run(self):
