@@ -80,13 +80,13 @@ COMMAND_VALUE_OFF       = 0     # I2C value representing off
 
 def ScanForPicoBorgReverse(busNumber = 1):
     """
-ScanForPicoBorgReverse([busNumber])
+    ScanForPicoBorgReverse([busNumber])
 
-Scans the I�C bus for a PicoBorg Reverse boards and returns a list of all usable addresses
-The busNumber if supplied is which I�C bus to scan, 0 for Rev 1 boards, 1 for Rev 2 boards, if not supplied the default is 1
+    Scans the I2C bus for a PicoBorg Reverse boards and returns a list of all usable addresses
+    The busNumber if supplied is which I�C bus to scan, 0 for Rev 1 boards, 1 for Rev 2 boards, if not supplied the default is 1
     """
     found = []
-    print 'Scanning I2C bus #%d' % (busNumber)
+    print ('Scanning I2C bus #%d' % (busNumber))
     bus = PicoBorgRev()
     for address in range(0x03, 0x78, 1):
         try:
@@ -94,7 +94,7 @@ The busNumber if supplied is which I�C bus to scan, 0 for Rev 1 boards, 1 for 
             i2cRecv = bus.RawRead(COMMAND_GET_ID, I2C_MAX_LEN)
             if len(i2cRecv) == I2C_MAX_LEN:
                 if i2cRecv[1] == I2C_ID_PICOBORG_REV:
-                    print 'Found PicoBorg Reverse at %02X' % (address)
+                    print ('Found PicoBorg Reverse at %02X' % (address))
                     found.append(address)
                 else:
                     pass
@@ -105,37 +105,37 @@ The busNumber if supplied is which I�C bus to scan, 0 for Rev 1 boards, 1 for 
         except:
             pass
     if len(found) == 0:
-        print 'No PicoBorg Reverse boards found, is bus #%d correct (should be 0 for Rev 1, 1 for Rev 2)' % (busNumber)
+        print ('No PicoBorg Reverse boards found, is bus #%d correct (should be 0 for Rev 1, 1 for Rev 2)' % (busNumber))
     elif len(found) == 1:
-        print '1 PicoBorg Reverse board found'
+        print ('1 PicoBorg Reverse board found')
     else:
-        print '%d PicoBorg Reverse boards found' % (len(found))
+        print ('%d PicoBorg Reverse boards found' % (len(found)))
     return found
 
 
 def SetNewAddress(newAddress, oldAddress = -1, busNumber = 1):
     """
-SetNewAddress(newAddress, [oldAddress], [busNumber])
+    SetNewAddress(newAddress, [oldAddress], [busNumber])
 
-Scans the I�C bus for the first PicoBorg Reverse and sets it to a new I2C address
-If oldAddress is supplied it will change the address of the board at that address rather than scanning the bus
-The busNumber if supplied is which I�C bus to scan, 0 for Rev 1 boards, 1 for Rev 2 boards, if not supplied the default is 1
-Warning, this new I�C address will still be used after resetting the power on the device
+    Scans the I�C bus for the first PicoBorg Reverse and sets it to a new I2C address
+    If oldAddress is supplied it will change the address of the board at that address rather than scanning the bus
+    The busNumber if supplied is which I�C bus to scan, 0 for Rev 1 boards, 1 for Rev 2 boards, if not supplied the default is 1
+    Warning, this new I�C address will still be used after resetting the power on the device
     """
     if newAddress < 0x03:
-        print 'Error, I�C addresses below 3 (0x03) are reserved, use an address between 3 (0x03) and 119 (0x77)'
+        print ('Error, I�C addresses below 3 (0x03) are reserved, use an address between 3 (0x03) and 119 (0x77)')
         return
     elif newAddress > 0x77:
-        print 'Error, I�C addresses above 119 (0x77) are reserved, use an address between 3 (0x03) and 119 (0x77)'
+        print ('Error, I�C addresses above 119 (0x77) are reserved, use an address between 3 (0x03) and 119 (0x77)')
         return
     if oldAddress < 0x0:
         found = ScanForPicoBorgReverse(busNumber)
         if len(found) < 1:
-            print 'No PicoBorg Reverse boards found, cannot set a new I�C address!'
+            print ('No PicoBorg Reverse boards found, cannot set a new I�C address!')
             return
         else:
             oldAddress = found[0]
-    print 'Changing I�C address from %02X to %02X (bus #%d)' % (oldAddress, newAddress, busNumber)
+    print ('Changing I�C address from %02X to %02X (bus #%d)' % (oldAddress, newAddress, busNumber))
     bus = PicoBorgRev()
     bus.InitBusOnly(busNumber, oldAddress)
     try:
@@ -143,56 +143,56 @@ Warning, this new I�C address will still be used after resetting the power on 
         if len(i2cRecv) == I2C_MAX_LEN:
             if i2cRecv[1] == I2C_ID_PICOBORG_REV:
                 foundChip = True
-                print 'Found PicoBorg Reverse at %02X' % (oldAddress)
+                print ('Found PicoBorg Reverse at %02X' % (oldAddress))
             else:
                 foundChip = False
-                print 'Found a device at %02X, but it is not a PicoBorg Reverse (ID %02X instead of %02X)' % (oldAddress, i2cRecv[1], I2C_ID_PICOBORG_REV)
+                print ('Found a device at %02X, but it is not a PicoBorg Reverse (ID %02X instead of %02X)' % (oldAddress, i2cRecv[1], I2C_ID_PICOBORG_REV))
         else:
             foundChip = False
-            print 'Missing PicoBorg Reverse at %02X' % (oldAddress)
+            print ('Missing PicoBorg Reverse at %02X' % (oldAddress))
     except KeyboardInterrupt:
         raise
     except:
         foundChip = False
-        print 'Missing PicoBorg Reverse at %02X' % (oldAddress)
+        print ('Missing PicoBorg Reverse at %02X' % (oldAddress))
     if foundChip:
         bus.RawWrite(COMMAND_SET_I2C_ADD, [newAddress])
         time.sleep(0.1)
-        print 'Address changed to %02X, attempting to talk with the new address' % (newAddress)
+        print ('Address changed to %02X, attempting to talk with the new address' % (newAddress))
         try:
             bus.InitBusOnly(busNumber, newAddress)
             i2cRecv = bus.RawRead(COMMAND_GET_ID, I2C_MAX_LEN)
             if len(i2cRecv) == I2C_MAX_LEN:
                 if i2cRecv[1] == I2C_ID_PICOBORG_REV:
                     foundChip = True
-                    print 'Found PicoBorg Reverse at %02X' % (newAddress)
+                    print ('Found PicoBorg Reverse at %02X' % (newAddress))
                 else:
                     foundChip = False
-                    print 'Found a device at %02X, but it is not a PicoBorg Reverse (ID %02X instead of %02X)' % (newAddress, i2cRecv[1], I2C_ID_PICOBORG_REV)
+                    print ('Found a device at %02X, but it is not a PicoBorg Reverse (ID %02X instead of %02X)' % (newAddress, i2cRecv[1], I2C_ID_PICOBORG_REV))
             else:
                 foundChip = False
-                print 'Missing PicoBorg Reverse at %02X' % (newAddress)
+                print ('Missing PicoBorg Reverse at %02X' % (newAddress))
         except KeyboardInterrupt:
             raise
         except:
             foundChip = False
-            print 'Missing PicoBorg Reverse at %02X' % (newAddress)
+            print ('Missing PicoBorg Reverse at %02X' % (newAddress))
     if foundChip:
-        print 'New I�C address of %02X set successfully' % (newAddress)
+        print ('New I�C address of %02X set successfully' % (newAddress))
     else:
-        print 'Failed to set new I�C address...'
+        print ('Failed to set new I�C address...')
 
 
 # Class used to control PicoBorg Reverse
 class PicoBorgRev:
     """
-This module is designed to communicate with the PicoBorg Reverse
+    This module is designed to communicate with the PicoBorg Reverse
 
-busNumber               I�C bus on which the PicoBorg Reverse is attached (Rev 1 is bus 0, Rev 2 is bus 1)
-bus                     the smbus object used to talk to the I�C bus
-i2cAddress              The I�C address of the PicoBorg Reverse chip to control
-foundChip               True if the PicoBorg Reverse chip can be seen, False otherwise
-printFunction           Function reference to call when printing text, if None "print" is used
+    busNumber               I�C bus on which the PicoBorg Reverse is attached (Rev 1 is bus 0, Rev 2 is bus 1)
+    bus                     the smbus object used to talk to the I�C bus
+    i2cAddress              The I�C address of the PicoBorg Reverse chip to control
+    foundChip               True if the PicoBorg Reverse chip can be seen, False otherwise
+    printFunction           Function reference to call when printing text, if None "print" is used
     """
 
     # Shared values used by this class
@@ -206,12 +206,12 @@ printFunction           Function reference to call when printing text, if None "
 
     def RawWrite(self, command, data):
         """
-RawWrite(command, data)
+        RawWrite(command, data)
 
-Sends a raw command on the I2C bus to the PicoBorg Reverse
-Command codes can be found at the top of PicoBorgRev.py, data is a list of 0 or more byte values
+        Sends a raw command on the I2C bus to the PicoBorg Reverse
+        Command codes can be found at the top of PicoBorgRev.py, data is a list of 0 or more byte values
 
-Under most circumstances you should use the appropriate function instead of RawWrite
+        Under most circumstances you should use the appropriate function instead of RawWrite
         """
         rawOutput = chr(command)
         for singleByte in data:
@@ -221,15 +221,15 @@ Under most circumstances you should use the appropriate function instead of RawW
 
     def RawRead(self, command, length, retryCount = 3):
         """
-RawRead(command, length, [retryCount])
+        RawRead(command, length, [retryCount])
 
-Reads data back from the PicoBorg Reverse after sending a GET command
-Command codes can be found at the top of PicoBorgRev.py, length is the number of bytes to read back
+        Reads data back from the PicoBorg Reverse after sending a GET command
+        Command codes can be found at the top of PicoBorgRev.py, length is the number of bytes to read back
 
-The function checks that the first byte read back matches the requested command
-If it does not it will retry the request until retryCount is exhausted (default is 3 times)
+        The function checks that the first byte read back matches the requested command
+        If it does not it will retry the request until retryCount is exhausted (default is 3 times)
 
-Under most circumstances you should use the appropriate function instead of RawRead
+        Under most circumstances you should use the appropriate function instead of RawRead
         """
         while retryCount > 0:
             self.RawWrite(command, [])
@@ -249,10 +249,10 @@ Under most circumstances you should use the appropriate function instead of RawR
 
     def InitBusOnly(self, busNumber, address):
         """
-InitBusOnly(busNumber, address)
+        InitBusOnly(busNumber, address)
 
-Prepare the I2C driver for talking to a PicoBorg Reverse on the specified bus and I2C address
-This call does not check the board is present or working, under most circumstances use Init() instead
+        Prepare the I2C driver for talking to a PicoBorg Reverse on the specified bus and I2C address
+        This call does not check the board is present or working, under most circumstances use Init() instead
         """
         self.busNumber = busNumber
         self.i2cAddress = address
@@ -264,35 +264,35 @@ This call does not check the board is present or working, under most circumstanc
 
     def Print(self, message):
         """
-Print(message)
+        Print(message)
 
-Wrapper used by the PicoBorgRev instance to print messages, will call printFunction if set, print otherwise
+        Wrapper used by the PicoBorgRev instance to print messages, will call printFunction if set, print otherwise
         """
         if self.printFunction == None:
-            print message
+            print (message)
         else:
             self.printFunction(message)
 
 
     def NoPrint(self, message):
         """
-NoPrint(message)
+        NoPrint(message)
 
-Does nothing, intended for disabling diagnostic printout by using:
-PBR = PicoBorgRev.PicoBorgRev()
-PBR.printFunction = PBR.NoPrint
+        Does nothing, intended for disabling diagnostic printout by using:
+        PBR = PicoBorgRev.PicoBorgRev()
+        PBR.printFunction = PBR.NoPrint
         """
         pass
 
 
     def Init(self, tryOtherBus = False):
         """
-Init([tryOtherBus])
+        Init([tryOtherBus])
 
-Prepare the I2C driver for talking to the PicoBorg Reverse
+        Prepare the I2C driver for talking to the PicoBorg Reverse
 
-If tryOtherBus is True, this function will attempt to use the other bus if the PicoBorg Reverse devices can not be found on the current busNumber
-    This is only really useful for early Raspberry Pi models!
+        If tryOtherBus is True, this function will attempt to use the other bus if the PicoBorg Reverse devices can not be found on the current busNumber
+            This is only really useful for early Raspberry Pi models!
         """
         self.Print('Loading PicoBorg Reverse on bus %d, address %02X' % (self.busNumber, self.i2cAddress))
 
@@ -340,14 +340,14 @@ If tryOtherBus is True, this function will attempt to use the other bus if the P
 
     def SetMotor2(self, power):
         """
-SetMotor2(power)
+        SetMotor2(power)
 
-Sets the drive level for motor 2, from +1 to -1.
-e.g.
-SetMotor2(0)     -> motor 2 is stopped
-SetMotor2(0.75)  -> motor 2 moving forward at 75% power
-SetMotor2(-0.5)  -> motor 2 moving reverse at 50% power
-SetMotor2(1)     -> motor 2 moving forward at 100% power
+        Sets the drive level for motor 2, from +1 to -1.
+        e.g.
+        SetMotor2(0)     -> motor 2 is stopped
+        SetMotor2(0.75)  -> motor 2 moving forward at 75% power
+        SetMotor2(-0.5)  -> motor 2 moving reverse at 50% power
+        SetMotor2(1)     -> motor 2 moving forward at 100% power
         """
         if power < 0:
             # Reverse
@@ -372,14 +372,14 @@ SetMotor2(1)     -> motor 2 moving forward at 100% power
 
     def GetMotor2(self):
         """
-power = GetMotor2()
+        power = GetMotor2()
 
-Gets the drive level for motor 2, from +1 to -1.
-e.g.
-0     -> motor 2 is stopped
-0.75  -> motor 2 moving forward at 75% power
--0.5  -> motor 2 moving reverse at 50% power
-1     -> motor 2 moving forward at 100% power
+        Gets the drive level for motor 2, from +1 to -1.
+        e.g.
+        0     -> motor 2 is stopped
+        0.75  -> motor 2 moving forward at 75% power
+        -0.5  -> motor 2 moving reverse at 50% power
+        1     -> motor 2 moving forward at 100% power
         """
         try:
             i2cRecv = self.RawRead(COMMAND_GET_A, I2C_MAX_LEN)
@@ -401,14 +401,14 @@ e.g.
 
     def SetMotor1(self, power):
         """
-SetMotor1(power)
+        SetMotor1(power)
 
-Sets the drive level for motor 1, from +1 to -1.
-e.g.
-SetMotor1(0)     -> motor 1 is stopped
-SetMotor1(0.75)  -> motor 1 moving forward at 75% power
-SetMotor1(-0.5)  -> motor 1 moving reverse at 50% power
-SetMotor1(1)     -> motor 1 moving forward at 100% power
+        Sets the drive level for motor 1, from +1 to -1.
+        e.g.
+        SetMotor1(0)     -> motor 1 is stopped
+        SetMotor1(0.75)  -> motor 1 moving forward at 75% power
+        SetMotor1(-0.5)  -> motor 1 moving reverse at 50% power
+        SetMotor1(1)     -> motor 1 moving forward at 100% power
         """
         if power < 0:
             # Reverse
@@ -433,14 +433,14 @@ SetMotor1(1)     -> motor 1 moving forward at 100% power
 
     def GetMotor1(self):
         """
-power = GetMotor1()
+        power = GetMotor1()
 
-Gets the drive level for motor 1, from +1 to -1.
-e.g.
-0     -> motor 1 is stopped
-0.75  -> motor 1 moving forward at 75% power
--0.5  -> motor 1 moving reverse at 50% power
-1     -> motor 1 moving forward at 100% power
+        Gets the drive level for motor 1, from +1 to -1.
+        e.g.
+        0     -> motor 1 is stopped
+        0.75  -> motor 1 moving forward at 75% power
+        -0.5  -> motor 1 moving reverse at 50% power
+        1     -> motor 1 moving forward at 100% power
         """
         try:
             i2cRecv = self.RawRead(COMMAND_GET_B, I2C_MAX_LEN)
@@ -462,14 +462,14 @@ e.g.
 
     def SetMotors(self, power):
         """
-SetMotors(power)
+        SetMotors(power)
 
-Sets the drive level for all motors, from +1 to -1.
-e.g.
-SetMotors(0)     -> all motors are stopped
-SetMotors(0.75)  -> all motors are moving forward at 75% power
-SetMotors(-0.5)  -> all motors are moving reverse at 50% power
-SetMotors(1)     -> all motors are moving forward at 100% power
+        Sets the drive level for all motors, from +1 to -1.
+        e.g.
+        SetMotors(0)     -> all motors are stopped
+        SetMotors(0.75)  -> all motors are moving forward at 75% power
+        SetMotors(-0.5)  -> all motors are moving reverse at 50% power
+        SetMotors(1)     -> all motors are moving forward at 100% power
         """
         if power < 0:
             # Reverse
@@ -494,9 +494,9 @@ SetMotors(1)     -> all motors are moving forward at 100% power
 
     def MotorsOff(self):
         """
-MotorsOff()
+        MotorsOff()
 
-Sets all motors to stopped, useful when ending a program
+        Sets all motors to stopped, useful when ending a program
         """
         try:
             self.RawWrite(COMMAND_ALL_OFF, [0])
@@ -508,9 +508,9 @@ Sets all motors to stopped, useful when ending a program
 
     def SetLed(self, state):
         """
-SetLed(state)
+        SetLed(state)
 
-Sets the current state of the LED, False for off, True for on
+        Sets the current state of the LED, False for off, True for on
         """
         if state:
             level = COMMAND_VALUE_ON
@@ -527,9 +527,9 @@ Sets the current state of the LED, False for off, True for on
 
     def GetLed(self):
         """
-state = GetLed()
+        state = GetLed()
 
-Reads the current state of the LED, False for off, True for on
+        Reads the current state of the LED, False for off, True for on
         """ 
         try:
             i2cRecv = self.RawRead(COMMAND_GET_LED, I2C_MAX_LEN)
@@ -547,9 +547,9 @@ Reads the current state of the LED, False for off, True for on
 
     def ResetEpo(self):
         """
-ResetEpo()
+        ResetEpo()
 
-Resets the EPO latch state, use to allow movement again after the EPO has been tripped
+        Resets the EPO latch state, use to allow movement again after the EPO has been tripped
         """
         try:
             self.RawWrite(COMMAND_RESET_EPO, [0])
@@ -561,12 +561,12 @@ Resets the EPO latch state, use to allow movement again after the EPO has been t
 
     def GetEpo(self):
         """
-state = GetEpo()
+        state = GetEpo()
 
-Reads the system EPO latch state.
-If False the EPO has not been tripped, and movement is allowed.
-If True the EPO has been tripped, movement is disabled if the EPO is not ignored (see SetEpoIgnore)
-    Movement can be re-enabled by calling ResetEpo.
+        Reads the system EPO latch state.
+        If False the EPO has not been tripped, and movement is allowed.
+        If True the EPO has been tripped, movement is disabled if the EPO is not ignored (see SetEpoIgnore)
+            Movement can be re-enabled by calling ResetEpo.
         """ 
         try:
             i2cRecv = self.RawRead(COMMAND_GET_EPO, I2C_MAX_LEN)
@@ -584,9 +584,9 @@ If True the EPO has been tripped, movement is disabled if the EPO is not ignored
 
     def SetEpoIgnore(self, state):
         """
-SetEpoIgnore(state)
+        SetEpoIgnore(state)
 
-Sets the system to ignore or use the EPO latch, set to False if you have an EPO switch, True if you do not
+        Sets the system to ignore or use the EPO latch, set to False if you have an EPO switch, True if you do not
         """
         if state:
             level = COMMAND_VALUE_ON
@@ -603,9 +603,9 @@ Sets the system to ignore or use the EPO latch, set to False if you have an EPO 
 
     def GetEpoIgnore(self):
         """
-state = GetEpoIgnore()
+        state = GetEpoIgnore()
 
-Reads the system EPO ignore state, False for using the EPO latch, True for ignoring the EPO latch
+        Reads the system EPO ignore state, False for using the EPO latch, True for ignoring the EPO latch
         """ 
         try:
             i2cRecv = self.RawRead(COMMAND_GET_EPO_IGNORE, I2C_MAX_LEN)
@@ -623,12 +623,12 @@ Reads the system EPO ignore state, False for using the EPO latch, True for ignor
 
     def SetCommsFailsafe(self, state):
         """
-SetCommsFailsafe(state)
+        SetCommsFailsafe(state)
 
-Sets the system to enable or disable the communications failsafe
-The failsafe will turn the motors off unless it is commanded at least once every 1/4 of a second
-Set to True to enable this failsafe, set to False to disable this failsafe
-The failsafe is disabled at power on
+        Sets the system to enable or disable the communications failsafe
+        The failsafe will turn the motors off unless it is commanded at least once every 1/4 of a second
+        Set to True to enable this failsafe, set to False to disable this failsafe
+        The failsafe is disabled at power on
         """
         if state:
             level = COMMAND_VALUE_ON
@@ -645,10 +645,10 @@ The failsafe is disabled at power on
 
     def GetCommsFailsafe(self):
         """
-state = GetCommsFailsafe()
+        state = GetCommsFailsafe()
 
-Read the current system state of the communications failsafe, True for enabled, False for disabled
-The failsafe will turn the motors off unless it is commanded at least once every 1/4 of a second
+        Read the current system state of the communications failsafe, True for enabled, False for disabled
+        The failsafe will turn the motors off unless it is commanded at least once every 1/4 of a second
         """ 
         try:
             i2cRecv = self.RawRead(COMMAND_GET_FAILSAFE, I2C_MAX_LEN)
@@ -666,23 +666,23 @@ The failsafe will turn the motors off unless it is commanded at least once every
 
     def GetDriveFault(self):
         """
-state = GetDriveFault()
+        state = GetDriveFault()
 
-Reads the system drive fault state, False for no problems, True for a fault has been detected
-Faults may indicate power problems, such as under-voltage (not enough power), and may be cleared by setting a lower drive power
-If a fault is persistent, it repeatably occurs when trying to control the board, this may indicate a wiring problem such as:
-    * The supply is not powerful enough for the motors
-        The board has a bare minimum requirement of 6V to operate correctly
-        A recommended minimum supply of 7.2V should be sufficient for smaller motors
-    * The + and - connections for either motor are connected to each other
-    * Either + or - is connected to ground (GND, also known as 0V or earth)
-    * Either + or - is connected to the power supply (V+, directly to the battery or power pack)
-    * One of the motors may be damaged
-Faults will self-clear, they do not need to be reset, however some faults require both motors to be moving at less than 100% to clear
-The easiest way to check is to put both motors at a low power setting which is high enough for them to rotate easily, such as 30%
-Note that the fault state may be true at power up, this is normal and should clear when both motors have been driven
-If there are no faults but you cannot make your motors move check GetEpo to see if the safety switch has been tripped
-For more details check the website at www.piborg.org/picoborgrev and double check the wiring instructions
+        Reads the system drive fault state, False for no problems, True for a fault has been detected
+        Faults may indicate power problems, such as under-voltage (not enough power), and may be cleared by setting a lower drive power
+        If a fault is persistent, it repeatably occurs when trying to control the board, this may indicate a wiring problem such as:
+            * The supply is not powerful enough for the motors
+                The board has a bare minimum requirement of 6V to operate correctly
+                A recommended minimum supply of 7.2V should be sufficient for smaller motors
+            * The + and - connections for either motor are connected to each other
+            * Either + or - is connected to ground (GND, also known as 0V or earth)
+            * Either + or - is connected to the power supply (V+, directly to the battery or power pack)
+            * One of the motors may be damaged
+        Faults will self-clear, they do not need to be reset, however some faults require both motors to be moving at less than 100% to clear
+        The easiest way to check is to put both motors at a low power setting which is high enough for them to rotate easily, such as 30%
+        Note that the fault state may be true at power up, this is normal and should clear when both motors have been driven
+        If there are no faults but you cannot make your motors move check GetEpo to see if the safety switch has been tripped
+        For more details check the website at www.piborg.org/picoborgrev and double check the wiring instructions
         """ 
         try:
             i2cRecv = self.RawRead(COMMAND_GET_DRIVE_FAULT, I2C_MAX_LEN)
@@ -700,13 +700,13 @@ For more details check the website at www.piborg.org/picoborgrev and double chec
 
     def SetEncoderMoveMode(self, state):
         """
-SetEncoderMoveMode(state)
+        SetEncoderMoveMode(state)
 
-Sets the system to enable or disable the encoder based move mode
-In encoder move mode (enabled) the EncoderMoveMotor* commands are available to move fixed distances
-In non-encoder move mode (disabled) the SetMotor* commands should be used to set drive levels
-The encoder move mode requires that the encoder feedback is attached to an encoder signal, see the website at www.piborg.org/picoborgrev for wiring instructions
-The encoder based move mode is disabled at power on
+        Sets the system to enable or disable the encoder based move mode
+        In encoder move mode (enabled) the EncoderMoveMotor* commands are available to move fixed distances
+        In non-encoder move mode (disabled) the SetMotor* commands should be used to set drive levels
+        The encoder move mode requires that the encoder feedback is attached to an encoder signal, see the website at www.piborg.org/picoborgrev for wiring instructions
+        The encoder based move mode is disabled at power on
         """
         if state:
             level = COMMAND_VALUE_ON
@@ -723,9 +723,9 @@ The encoder based move mode is disabled at power on
 
     def GetEncoderMoveMode(self):
         """
-state = GetEncoderMoveMode()
+        state = GetEncoderMoveMode()
 
-Read the current system state of the encoder based move mode, True for enabled (encoder moves), False for disabled (power level moves)
+        Read the current system state of the encoder based move mode, True for enabled (encoder moves), False for disabled (power level moves)
         """ 
         try:
             i2cRecv = self.RawRead(COMMAND_GET_ENC_MODE, I2C_MAX_LEN)
@@ -743,14 +743,14 @@ Read the current system state of the encoder based move mode, True for enabled (
 
     def EncoderMoveMotor2(self, counts):
         """
-EncoderMoveMotor2(counts)
+        EncoderMoveMotor2(counts)
 
-Moves motor 2 until it has seen a number of encoder counts, up to 32767
-Use negative values to move in reverse
-e.g.
-EncoderMoveMotor2(100)   -> motor 2 moving forward for 100 counts
-EncoderMoveMotor2(-50)   -> motor 2 moving reverse for 50 counts
-EncoderMoveMotor2(5)     -> motor 2 moving forward for 5 counts
+        Moves motor 2 until it has seen a number of encoder counts, up to 32767
+        Use negative values to move in reverse
+        e.g.
+        EncoderMoveMotor2(100)   -> motor 2 moving forward for 100 counts
+        EncoderMoveMotor2(-50)   -> motor 2 moving reverse for 50 counts
+        EncoderMoveMotor2(5)     -> motor 2 moving forward for 5 counts
         """
         counts = int(counts)
         if counts < 0:
@@ -777,14 +777,14 @@ EncoderMoveMotor2(5)     -> motor 2 moving forward for 5 counts
 
     def EncoderMoveMotor1(self, counts):
         """
-EncoderMoveMotor1(counts)
+        EncoderMoveMotor1(counts)
 
-Moves motor 1 until it has seen a number of encoder counts, up to 32767
-Use negative values to move in reverse
-e.g.
-EncoderMoveMotor1(100)   -> motor 1 moving forward for 100 counts
-EncoderMoveMotor1(-50)   -> motor 1 moving reverse for 50 counts
-EncoderMoveMotor1(5)     -> motor 1 moving forward for 5 counts
+        Moves motor 1 until it has seen a number of encoder counts, up to 32767
+        Use negative values to move in reverse
+        e.g.
+        EncoderMoveMotor1(100)   -> motor 1 moving forward for 100 counts
+        EncoderMoveMotor1(-50)   -> motor 1 moving reverse for 50 counts
+        EncoderMoveMotor1(5)     -> motor 1 moving forward for 5 counts
         """
         counts = int(counts)
         if counts < 0:
@@ -811,14 +811,14 @@ EncoderMoveMotor1(5)     -> motor 1 moving forward for 5 counts
 
     def EncoderMoveMotors(self, counts):
         """
-EncoderMoveMotors(counts)
+        EncoderMoveMotors(counts)
 
-Moves all motors until they have each seen a number of encoder counts, up to 65535
-Use negative values to move in reverse
-e.g.
-EncoderMoveMotors(100)   -> all motors moving forward for 100 counts
-EncoderMoveMotors(-50)   -> all motors moving reverse for 50 counts
-EncoderMoveMotors(5)     -> all motors moving forward for 5 counts
+        Moves all motors until they have each seen a number of encoder counts, up to 65535
+        Use negative values to move in reverse
+        e.g.
+        EncoderMoveMotors(100)   -> all motors moving forward for 100 counts
+        EncoderMoveMotors(-50)   -> all motors moving reverse for 50 counts
+        EncoderMoveMotors(5)     -> all motors moving forward for 5 counts
         """
         counts = int(counts)
         if counts < 0:
@@ -846,9 +846,9 @@ EncoderMoveMotors(5)     -> all motors moving forward for 5 counts
 
     def IsEncoderMoving(self):
         """
-state = IsEncoderMoving()
+        state = IsEncoderMoving()
 
-Reads the current state of the encoder motion, False for all motors have finished, True for any motor is still moving
+        Reads the current state of the encoder motion, False for all motors have finished, True for any motor is still moving
         """ 
         try:
             i2cRecv = self.RawRead(COMMAND_GET_ENC_MOVING, I2C_MAX_LEN)
@@ -866,11 +866,11 @@ Reads the current state of the encoder motion, False for all motors have finishe
 
     def WaitWhileEncoderMoving(self, timeout = -1):
         """
-success = WaitWhileEncoderMoving([timeout])
+        success = WaitWhileEncoderMoving([timeout])
 
-Waits until all motors have finished performing encoder based moves
-If the motors stop moving the function will return True
-If a timeout is provided the function will return False after timeout seconds if the motors are still in motion
+        Waits until all motors have finished performing encoder based moves
+        If the motors stop moving the function will return True
+        If a timeout is provided the function will return False after timeout seconds if the motors are still in motion
         """
         startTime = time.time()
         while self.IsEncoderMoving():
@@ -884,14 +884,14 @@ If a timeout is provided the function will return False after timeout seconds if
 
     def SetEncoderSpeed(self, power):
         """
-SetEncoderSpeed(power)
+        SetEncoderSpeed(power)
 
-Sets the drive limit for encoder based moves, from 0 to 1.
-e.g.
-SetEncoderSpeed(0.01)  -> motors may move at up to 1% power
-SetEncoderSpeed(0.1)   -> motors may move at up to 10% power
-SetEncoderSpeed(0.5)   -> motors may move at up to 50% power
-SetEncoderSpeed(1)     -> motors may move at up to 100% power
+        Sets the drive limit for encoder based moves, from 0 to 1.
+        e.g.
+        SetEncoderSpeed(0.01)  -> motors may move at up to 1% power
+        SetEncoderSpeed(0.1)   -> motors may move at up to 10% power
+        SetEncoderSpeed(0.5)   -> motors may move at up to 50% power
+        SetEncoderSpeed(1)     -> motors may move at up to 100% power
         """
         pwm = int(PWM_MAX * power)
         if pwm > PWM_MAX:
@@ -907,14 +907,14 @@ SetEncoderSpeed(1)     -> motors may move at up to 100% power
 
     def GetEncoderSpeed(self):
         """
-power = GetEncoderSpeed()
+        power = GetEncoderSpeed()
 
-Gets the drive limit for encoder based moves, from 0 to 1.
-e.g.
-0.01  -> motors may move at up to 1% power
-0.1   -> motors may move at up to 10% power
-0.5   -> motors may move at up to 50% power
-1     -> motors may move at up to 100% power
+        Gets the drive limit for encoder based moves, from 0 to 1.
+        e.g.
+        0.01  -> motors may move at up to 1% power
+        0.1   -> motors may move at up to 10% power
+        0.5   -> motors may move at up to 50% power
+        1     -> motors may move at up to 100% power
         """
         try:
             i2cRecv = self.RawRead(COMMAND_GET_ENC_SPEED, I2C_MAX_LEN)
@@ -930,15 +930,14 @@ e.g.
 
     def Help(self):
         """
-Help()
+        Help()
 
-Displays the names and descriptions of the various functions and settings provided
+        Displays the names and descriptions of the various functions and settings provided
         """
         funcList = [PicoBorgRev.__dict__.get(a) for a in dir(PicoBorgRev) if isinstance(PicoBorgRev.__dict__.get(a), types.FunctionType)]
         funcListSorted = sorted(funcList, key = lambda x: x.func_code.co_firstlineno)
 
-        print self.__doc__
-        print
+        print (self.__doc__)
+        print ()
         for func in funcListSorted:
-            print '=== %s === %s' % (func.func_name, func.func_doc)
-
+            print ('=== %s === %s' % (func.func_name, func.func_doc))

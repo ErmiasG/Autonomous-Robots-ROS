@@ -17,10 +17,11 @@ catkin_create_pkg assignment_3 roscpp rosbag
 
 #Project
 
-catkin_create_pkg control roscpp rospy 
-catkin_create_pkg drive roscpp rospy
+catkin_create_pkg drive roscpp rospy nav_msgs
 
 Moving around:
    u    i    o
    j    k    l
    m    ,    .
+
+https://robotics.stackexchange.com/questions/18048/inverse-kinematics-for-differential-robot-knowing-linear-and-angular-velocities
