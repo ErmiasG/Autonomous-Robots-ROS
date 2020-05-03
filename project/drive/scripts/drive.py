@@ -6,20 +6,32 @@ from geometry_msgs.msg import Point, Pose, Quaternion, Twist, Vector3
 from nav_msgs.msg import Odometry
 import tf
 import math
-from math import sin, cos, pi
+from math import sin, cos, pi, abs
 import PicoBorgRev
 
 #Speed = (RPM (diameter * PI) / 60)
 RPM_MAX = 60 # max rpm when power is 100%
 WHEEL_CIRCUMFERENCE = 0.06*pi # (diameter * PI)
 AXLE_LENGTH = 0.18 # length of the differential drive wheel axle
+FRAME_ID = "odom" # 
+CHILD_FRAME_ID = "base_link" # child_frame_id
+
+class RobotPose:
+
+    def __init__(self):
+        self.x = 0
+        self.y = 0
+        self.theta = 0
+        self.vx = 0
+        self.vy = 0
+        self.vtheta = 0
+
 
 class Drive:
 
     def __init__(self):
         sys.stdout = sys.stderr
-        self.last_time = rospy.Time.now()
-        self.pose = Vector3(0.0, 0.0, 0.0)
+        self.pose = RobotPose()
         self.pub_odom = rospy.Publisher("odom", Odometry, queue_size=50)
         self.sub_cmd_vel = rospy.Subscriber("cmd_vel", Twist, self.cmd_vel_callback, queue_size=1)
         self.odom_broadcaster = tf.TransformBroadcaster()
@@ -67,56 +79,80 @@ class Drive:
         self.PBR.ResetEpo()
         self.PBR.MotorsOff()
 
-    def get_velocity(self):
-        power1 = self.PBR.GetMotor1()
+    def get_travel(self):
+        power1 = -self.PBR.GetMotor1()
         power2 = self.PBR.GetMotor2()
-        rpm1 = power1*RPM_MAX
-        rpm2 = power2*RPM_MAX
-        v_left = rpm1*WHEEL_CIRCUMFERENCE/60
-        v_right = rpm2*WHEEL_CIRCUMFERENCE/60
-        linear_velocity = (v_left + v_right)/2
-        vth = (v_right - v_left)/AXLE_LENGTH
-        return linear_velocity, -linear_velocity, vth
+        rotation1 = power1*RPM_MAX
+        rotation2 = power2*RPM_MAX
+        leftTravel = rotation1*WHEEL_CIRCUMFERENCE/60
+        rightTravel = rotation2*WHEEL_CIRCUMFERENCE/60
+        return leftTravel, rightTravel
 
-    def update_pos(self):
+    def update_pose(self, current_time):
+        leftTravel, rightTravel = self.get_travel()
+        deltaTime = current_time - self.last_time
+
+        deltaTravel = (rightTravel + leftTravel) / 2
+        deltaTheta = (rightTravel - leftTravel) / AXLE_LENGTH
+
+        if rightTravel == leftTravel:
+            deltaX = leftTravel*cos(self.pose.theta)
+            deltaY = leftTravel*sin(self.pose.theta)
+        else:
+            radius = deltaTravel / deltaTheta
+
+            # Find the instantaneous center of curvature (ICC).
+            iccX = self.pose.x - radius*sin(self.pose.theta)
+            iccY = self.pose.y + radius*cos(self.pose.theta)
+
+            deltaX = cos(deltaTheta)*(self.pose.x - iccX) \
+                - sin(deltaTheta)*(self.pose.y - iccY) \
+                + iccX - self.pose.x
+
+            deltaY = sin(deltaTheta)*(self.pose.x - iccX) \
+                + cos(deltaTheta)*(self.pose.y - iccY) \
+                + iccY - self.pose.y
+
+        self.pose.x += deltaX
+        self.pose.y += deltaY
+        self.pose.theta = (self.pose.theta + deltaTheta) % (2*pi)
+        self.pose.vx = deltaTravel / deltaTime if deltaTime > 0 else 0.
+        self.pose.vy = 0
+        self.pose.vtheta = deltaTheta / deltaTime if deltaTime > 0 else 0.
+
+        self.last_time = current_time
+
+    def publish_odom(self):
         current_time = rospy.Time.now()
-        vx, vy, vth = self.get_velocity()
         
-        th = self.pos.z
-        dt = (current_time - last_time).to_sec()
-        delta_x = (vx * cos(th) - vy * sin(th)) * dt
-        delta_y = (vx * sin(th) + vy * cos(th)) * dt
-        delta_th = vth * dt
+        self.update_pose(current_time)
 
-        self.pose.x += delta_x
-        self.pose.y += delta_y
-        self.pose.z += delta_th
-
-        odom_quat = tf.transformations.quaternion_from_euler(0, 0, th)
+        odom_quat = tf.transformations.quaternion_from_euler(0, 0, self.pose.theta)
 
         self.odom_broadcaster.sendTransform(
             (self.pose.x, self.pose.y, 0.),
             odom_quat,
             current_time,
-            "base_link",
-            "odom"
+            CHILD_FRAME_ID,
+            FRAME_ID
         )
 
         # publish the odometry msg
         odom = Odometry()
         odom.header.stamp = current_time
-        odom.header.frame_id = "odom"
-
-        # set the position
-        odom.pose.pose = Pose(Point(self.pos.x, self.pos.y, 0.), Quaternion(*odom_quat))
-
-        # set the velocity
-        odom.child_frame_id = "base_link"
-        odom.twist.twist = Twist(Vector3(vx, vy, 0), Vector3(0, 0, vth))
+        odom.header.frame_id = FRAME_ID
+        odom.child_frame_id = CHILD_FRAME_ID
+        odom.pose.pose.position.x = self.pose.x
+        odom.pose.pose.position.y = self.pose.y
+        odom.pose.pose.orientation.x = odom_quat[0]
+        odom.pose.pose.orientation.y = odom_quat[1]
+        odom.pose.pose.orientation.z = odom_quat[2]
+        odom.pose.pose.orientation.w = odom_quat[3]
+        odom.twist.twist.linear.x = self.pose.vx
+        odom.twist.twist.angular.z = self.pose.vtheta
 
         # publish the message
-        self.odom_pub.publish(odom)
-        self.last_time = current_time
+        self.pub_odom.publish(odom)
 
     def cmd_vel_callback(self, twist):
         upDown = twist.linear.x
@@ -140,10 +176,10 @@ class Drive:
 
     def run(self):
         rospy.init_node("drive")
-        rospy.init_node("odometry")
+        self.last_time = rospy.Time.now()
         r = rospy.Rate(1.0)
         while not rospy.is_shutdown():
-            self.update_pos()
+            self.publish_odom()
             r.sleep()
 
         self.turn_off()
