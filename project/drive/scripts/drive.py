@@ -26,6 +26,9 @@ class RobotPose:
         self.vy = 0
         self.vtheta = 0
 
+    def __str__(self):
+        return str({'x': self.x, 'y': self.y, 'theta': self.theta,
+                    'vx': self.vx, 'vy': self.vy, 'vtheta': self.vtheta})
 
 class Drive:
 
@@ -90,7 +93,7 @@ class Drive:
 
     def update_pose(self, current_time):
         leftTravel, rightTravel = self.get_travel()
-        deltaTime = current_time - self.last_time
+        deltaTime = (current_time - self.last_time).to_sec()
 
         deltaTravel = (rightTravel + leftTravel) / 2
         deltaTheta = (rightTravel - leftTravel) / AXLE_LENGTH
@@ -126,7 +129,7 @@ class Drive:
         current_time = rospy.Time.now()
         
         self.update_pose(current_time)
-
+        print("pose=", str(self.pose))
         odom_quat = tf.transformations.quaternion_from_euler(0, 0, self.pose.theta)
 
         self.odom_broadcaster.sendTransform(
@@ -144,11 +147,10 @@ class Drive:
         odom.child_frame_id = CHILD_FRAME_ID
         odom.pose.pose.position.x = self.pose.x
         odom.pose.pose.position.y = self.pose.y
-        odom.pose.pose.orientation.x = odom_quat[0]
-        odom.pose.pose.orientation.y = odom_quat[1]
-        odom.pose.pose.orientation.z = odom_quat[2]
-        odom.pose.pose.orientation.w = odom_quat[3]
+        odom.pose.pose.position.z = 0.0
+        odom.pose.pose.orientation = odom_quat
         odom.twist.twist.linear.x = self.pose.vx
+        odom.twist.twist.linear.y = self.pose.vy
         odom.twist.twist.angular.z = self.pose.vtheta
 
         # publish the message

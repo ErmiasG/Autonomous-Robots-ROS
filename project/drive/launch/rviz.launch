@@ -1,0 +1,6 @@
+<launch>
+  <arg name="urdf_file" default="$(find drive)/urdf/robot_description.xacro" />
+  <param name="robot_description" command="$(find xacro)/xacro --inorder $(arg urdf_file)" />
+
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find drive)/config/view.rviz" />
+</launch>
