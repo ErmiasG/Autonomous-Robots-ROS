@@ -134,7 +134,7 @@ class Drive:
 
         self.odom_broadcaster.sendTransform(
             (self.pose.x, self.pose.y, 0.),
-            odom_quat,
+            (odom_quat[0], odom_quat[1], odom_quat[2], odom_quat[3]),
             current_time,
             CHILD_FRAME_ID,
             FRAME_ID
@@ -148,7 +148,10 @@ class Drive:
         odom.pose.pose.position.x = self.pose.x
         odom.pose.pose.position.y = self.pose.y
         odom.pose.pose.position.z = 0.0
-        odom.pose.pose.orientation = odom_quat
+        odom.pose.pose.orientation.x = odom_quat[0]
+        odom.pose.pose.orientation.y = odom_quat[1]
+        odom.pose.pose.orientation.z = odom_quat[2]
+        odom.pose.pose.orientation.w = odom_quat[3]
         odom.twist.twist.linear.x = self.pose.vx
         odom.twist.twist.linear.y = self.pose.vy
         odom.twist.twist.angular.z = self.pose.vtheta
