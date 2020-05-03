@@ -6,7 +6,7 @@ from geometry_msgs.msg import Point, Pose, Quaternion, Twist, Vector3
 from nav_msgs.msg import Odometry
 import tf
 import math
-from math import sin, cos, pi, abs
+from math import sin, cos, pi
 import PicoBorgRev
 
 #Speed = (RPM (diameter * PI) / 60)
