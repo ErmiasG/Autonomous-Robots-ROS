@@ -78,7 +78,7 @@ class Drive:
         if not failsafe:
             print ('Board %02X failed to report in failsafe mode!' % (PBR.i2cAddress))
             sys.exit()
-        self.PBR.SetCommsFailsafe(False)
+        #self.PBR.SetCommsFailsafe(False)
         self.PBR.ResetEpo()
         self.PBR.MotorsOff()
 
@@ -177,6 +177,7 @@ class Drive:
 
     def turn_off(self):
         #self.PBR.SetLed(False)
+        self.PBR.SetCommsFailsafe(False)
         self.PBR.MotorsOff()
 
     def run(self):
